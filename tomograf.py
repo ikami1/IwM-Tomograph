@@ -4,10 +4,11 @@ import numpy as np
 import math
 from PIL import Image
 
-#name="example_image.png"
-name="phantom256.gif"
-ile_emiterow=200
-kat_kroku=2
+#name = "example_image.png"
+name = "phantom256.gif"
+ile_emiterow = 200
+#rozpietosc_katowa_punktow = 90  #w stopniach, w radianach: alfa*math.pi/180
+kat_kroku = 2
 
 
 def plotLineLow(x0, y0, x1, y1, img, img2, img_size):
@@ -162,10 +163,10 @@ def bresenham2TEST(xx1,yy1,xx2,yy2,img,img2,img_size):
     return suma/licznik
 
 def get_sinogram(img, img_size, D):
-    ile_krokow=round(180/kat_kroku)
-    sx=round(D+(img_size/2))
-    sy=round(D+(img_size/2))
-    r=round((img_size*math.sqrt(2))/2)
+    ile_krokow = round(180/kat_kroku)
+    sx = round(D+(img_size/2))
+    sy = round(D+(img_size/2))
+    r = img_size/2
     x_start=np.linspace(D,D+img_size,ile_emiterow, dtype=int, endpoint=False)
     #emit_y, odbiornik_y=init_y(x_start, sx, sy, r)
     emit_y, odbiornik_y=init_y(x_start, sx, sy, int(img_size/2))
@@ -183,15 +184,16 @@ def get_sinogram(img, img_size, D):
 
     return sin_img
 
+
 def inv_radon(img_sin):
-    inv_sin=img_sin
+    inv_sin = img_sin
     return inv_sin
 
 
 def main():
-    img=io.imread(name, as_grey=True)
-    X,Y=img.shape
-    R=int((X*math.sqrt(2))/2)
+    img = io.imread(name, as_grey=True)
+    width, height = img.shape
+    radius = width/2
     Delt=0
     '''nimg=np.zeros((100+R*2,100+R*2))
     S=int(X/2)
@@ -200,22 +202,29 @@ def main():
         for yh in range(Y):
             nimg[Delt+eh,Delt+yh]=img[eh,yh]
     img=nimg'''
-    if X==Y:
-        #Jakos zrobic zeby img byl od 0 do 255 a nie 0 do 1
-        img=img*255
-        plt.subplot(3,1,1)
+
+    if width == height:
+        plt.subplot(2, 2, 1)
+        plt.title('Obraz wejsciowy')
+        plt.axis('off')
         io.imshow(img, cmap="gray")
-        plt.subplot(3,1,2)
-        sinogram=get_sinogram(img, X, Delt)
+
+        plt.subplot(2, 2, 2)
+        sinogram = get_sinogram(img, width, Delt)
         #sinogram = sinogram.resize((sinogram.size[0] + 100, sinogram.size[1]), Image.ANTIALIAS)
         #io.imsave("sinogram.jpg",sinogram)
-        io.imshow(sinogram)
-        plt.subplot(3,1,3)
-        re_img=inv_radon(sinogram)
-        io.imshow(re_img)
+        plt.title('Sinogram')
+        io.imshow(sinogram, cmap="gray")
+
+        plt.subplot(2, 2, 4)
+        re_img = inv_radon(sinogram)
+        plt.title('Obraz wyjsciowy')
+        io.imshow(re_img, cmap='gray')
+
         io.show()
     else:
         print("Obrazek nie jest kwadratowy")
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     main()
